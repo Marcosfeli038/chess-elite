@@ -297,10 +297,17 @@ header{
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
         </div>
 
-        <button onclick="alert('Em breve: integração automática do Pix para liberação instantânea!')" style="background: #f59e0b; color: #111827; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px;">
-            ⚡ Quero ser VIP Agora
+        <!-- OPÇÕES DE PAGAMENTO PIX / QR CODE -->
+        <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #374151; text-align: center;">
+            <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício:</span>
+            <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
+        </div>
+<!-- BOTÃO DE PAGAMENTO MERCADO PAGO -->
+        <button onclick="window.open('https:mpago.la/141jBqp', '_blank')" style="background: #009ee3; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            💙 Pagar com Mercado Pago (R$ 19,90)
         </button>
-    </div>
+
+        <p style="font-size: 11px; color: #9ca3af; margin-top: 15px; text-align: center;">Após o pagamento, envie o comprovante para liberação do acesso.</p>
 </div>
 <!-- TELA 2: TABULEIRO / JOGO -->
 <div class="screen" id="gameScreen">
