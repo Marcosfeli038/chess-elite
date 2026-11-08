@@ -302,24 +302,43 @@ header{
 </button>
 
 <!-- MODAL PREMIUM -->
-<div id="premiumModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1002; align-items: center; justify-content: center;">
-    <div style="background: #1f2937; color: #fff; padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; font-family: sans-serif; position: relative; border: 2px solid #f59e0b;">
-        <span onclick="closePremiumModal()" style="position: absolute; top: 12px; right: 18px; cursor: pointer; font-size: 22px; color: #aaa;">&times;</span>
-        
-        <h2 style="margin-top: 0; color: #f59e0b;">Chess Elite 👑 VIP</h2>
-        <p style="font-size: 14px; color: #d1d5db;">Desbloqueie a experiência definitiva sem anúncios e com recursos exclusivos!</p>
-        
-        <ul style="text-align: left; font-size: 14px; color: #9ca3af; margin: 20px 0; padding-left: 20px; line-height: 1.6;">
-            <li>🚫 <strong style="color: #fff;">Zero Anúncios</strong> na plataforma</li>
-            <li>💬 <strong style="color: #fff;">Chat ao vivo</strong> nas partidas online</li>
-            <li>🎨 <strong style="color: #fff;">Temas exclusivos</strong> de tabuleiros</li>
-            <li>📊 <strong style="color: #fff;">Análise avançada</strong> de lances</li>
-        </ul>
+<div id="premiumModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000;">
+        <div style="background: #1f2937; padding: 25px; border-radius: 12px; width: 350px; text-align: center; color: #fff; border: 1px solid #374151; position: relative;">
+            <span onclick="closePremiumModal()" style="position: absolute; top: 12px; right: 18px; cursor: pointer; font-size: 18px; color: #9ca3af;">&times;</span>
+            
+            <h2 style="margin-top: 0; color: #f59e0b;">Chess Elite ⭐ VIP</h2>
+            <p style="font-size: 13px; color: #d1d5db;">Desbloqueie a experiência definitiva sem anúncios e com recursos exclusivos!</p>
+            
+            <ul style="text-align: left; font-size: 13px; color: #9ca3af; margin: 15px 0; padding-left: 20px;">
+                <li><strong style="color: #fff;">Zero Anúncios</strong> na plataforma</li>
+                <li><strong style="color: #fff;">Chat ao vivo</strong> nas partidas online</li>
+                <li><strong style="color: #fff;">Temas exclusivos</strong> de tabuleiros</li>
+                <li><strong style="color: #fff;">Análise avançada</strong> de lances</li>
+            </ul>
 
-        <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #374151;">
-            <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício por Pix:</span>
-            <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
+            <!-- CAIXA DE PAGAMENTO ÚNICA -->
+            <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
+                <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
+                <span style="font-size: 22px; font-weight: bold; color: #34d399; display: block; margin-top: 3px;">R$ 19,90</span>
+                
+                <div style="background: #1f2937; padding: 8px; border-radius: 6px; margin: 10px 0; border: 1px dashed #4b5563; word-break: break-all;">
+                    <span id="txtChavePix" style="font-size: 11px; color: #f3f4f6; font-family: monospace;">00020126580014BR.GOV.BCB.PIX0136271a3e62-b6a6-4eeb-87fa-9b0329747622520400005303986540519.905802BR5924Marcos Felipe Cavalcante6009SAO PAULO62140510PLtGryFLdV630450D3</span>
+                </div>
+                
+                <button onclick="copiarChavePixSimples()" style="background: #820ad1; color: #fff; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%;">
+                    📋 Copiar Chave Pix
+                </button>
+                <p id="pixCopyStatus" style="font-size: 10px; color: #34d399; margin-top: 4px; display: none;">Chave Pix copiada com sucesso!</p>
+                
+                <!-- BOTÃO DE ATIVAÇÃO VIP -->
+                <button onclick="ativarVipConta()" style="background: #eab308; color: #000; border: none; padding: 9px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 10px; width: 100%;">
+                    ⭐ Já Fiz o Pagamento (Ativar VIP)
+                </button>
+            </div>
+            
+            <button onclick="closePremiumModal()" style="background: #374151; color: #fff; border: none; padding: 8px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 13px;">Fechar</button>
         </div>
+    </div>
         <!-- CAIXA DE PAGAMENTO APENAS COM CHAVE PIX E VALOR -->
         <div style="background: #111827; padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
