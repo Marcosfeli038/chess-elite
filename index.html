@@ -217,7 +217,31 @@ header{
 </style>
 </head>
 <body>
+ <!-- ========================================== -->
+    <!-- COLE ESTES BOTÕES E O MODAL AQUI NO TOPO   -->
+    <!-- ========================================== -->
+    <div id="authContainer" style="position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 100;">
+        <button onclick="abrirModalAuth('login')" style="background: #374151; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">
+            🔑 Entrar
+        </button>
+        <button onclick="abrirModalAuth('registro')" style="background: #2563eb; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">
+            📝 Criar Conta
+        </button>
+    </div>
 
+    <!-- MODAL DE LOGIN / REGISTO -->
+    <div id="modalAuth" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background: #1f2937; padding: 25px; border-radius: 12px; width: 300px; border: 1px solid #374151; text-align: center; color: #fff;">
+            <h3 id="authTitle" style="margin-bottom: 15px; font-size: 18px;">Entrar no Chess Elite</h3>
+            
+            <input type="email" id="authEmail" placeholder="Seu e-mail" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #4b5563; background: #111827; color: #fff; box-sizing: border-box;" />
+            <input type="password" id="authSenha" placeholder="Sua senha" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #4b5563; background: #111827; color: #fff; box-sizing: border-box;" />
+            
+            <button id="authActionBtn" onclick="executarAuth()" style="background: #10b981; color: #fff; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 10px;">Entrar</button>
+            <button onclick="fecharModalAuth()" style="background: transparent; color: #9ca3af; border: none; cursor: pointer; font-size: 12px;">Cancelar</button>
+        </div>
+    </div>
+    <!-- ========================================== -->
 <!-- TELA 1: MENU INICIAL -->
 <div class="screen active" id="menuScreen">
   <div class="menu-container">
@@ -1182,6 +1206,74 @@ function copiarChavePixSimples() {
             setTimeout(() => { status.style.display = 'none'; }, 3000);
         });
     }
+    let modoAuthAtual = 'login'; // 'login' ou 'registro'
+
+    function abrirModalAuth(modo) {
+        modoAuthAtual = modo;
+        document.getElementById('authTitle').innerText = modo === 'login' ? 'Entrar no Chess Elite' : 'Criar Nova Conta';
+        document.getElementById('authActionBtn').innerText = modo === 'login' ? 'Entrar' : 'Registar';
+        document.getElementById('modalAuth').style.display = 'flex';
+    }
+
+    function fecharModalAuth() {
+        document.getElementById('modalAuth').style.display = 'none';
+    }
+
+    function executarAuth() {
+        const email = document.getElementById('authEmail').value.trim();
+        const senha = document.getElementById('authSenha').value.trim();
+
+        if (!email || !senha) {
+            alert('Por favor, preencha o e-mail e a senha.');
+            return;
+        }
+
+        if (modoAuthAtual === 'registro') {
+            const novoUtilizador = { email, senha, vip: false };
+            localStorage.setItem('chess_user_' + email, JSON.stringify(novoUtilizador));
+            alert('Conta criada com sucesso! Faça login para continuar.');
+            abrirModalAuth('login');
+        } else {
+            const dadosConta = localStorage.getItem('chess_user_' + email);
+            if (!dadosConta) {
+                alert('Conta não encontrada! Crie uma conta primeiro.');
+                return;
+            }
+            const utilizador = JSON.parse(dadosConta);
+            if (utilizador.senha !== senha) {
+                alert('Senha incorreta!');
+                return;
+            }
+            
+            localStorage.setItem('chess_logged_user', JSON.stringify(utilizador));
+            alert('Bem-vindo de volta, ' + email + '!');
+            fecharModalAuth();
+            atualizarInterfaceUtilizador();
+        }
+    }
+
+    function atualizarInterfaceUtilizador() {
+        const logadoStr = localStorage.getItem('chess_logged_user');
+        if (logadoStr) {
+            const user = JSON.parse(logadoStr);
+            const authContainer = document.getElementById('authContainer');
+            authContainer.innerHTML = `
+                <span style="font-size: 12px; color: #34d399; align-self: center;">👤 ${user.email} ${user.vip ? '⭐ [VIP]' : ''}</span>
+                <button onclick="fazerLogout()" style="background: #ef4444; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px;">Sair</button>
+            `;
+        }
+    }
+
+    function fazerLogout() {
+        localStorage.removeItem('chess_logged_user');
+        location.reload();
+    }
+
+    // Executa ao carregar a página para manter o utilizador logado
+    window.onload = function() {
+        atualizarInterfaceUtilizador();
+    };
+
 </script>
 <!-- BOTÃO FLUTUANTE DE APOIO -->
 <button id="pixBtn" onclick="openPixModal()" style="position: fixed; bottom: 20px; right: 20px; background-color: #32bcad; color: #fff; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; font-family: sans-serif;">
