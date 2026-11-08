@@ -296,25 +296,26 @@ header{
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício por Pix:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
         </div>
-        <!-- CAIXA DE PREÇO E QR CODE DO MERCADO PAGO -->
+        <!-- CAIXA DE PREÇO E QR CODE PIX NATIVO -->
         <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
             
-            <!-- QR CODE GERADO DIRETAMENTE NO MODAL -->
+            <!-- QR CODE GERADO COM A CHAVE PIX DIRETA -->
             <div style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin-top: 15px;">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https:mpago.la/141jBqp" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=9f52df51-12d8-44d4-99ed-60cbec9a5a4d" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
             </div>
             
-            <p style="font-size: 12px; color: #d1d5db; margin-top: 10px;">Escaneie o QR Code com o app do banco ou clique abaixo:</p>
+            <p style="font-size: 12px; color: #d1d5db; margin-top: 10px;">Escaneie o QR Code com o app do seu banco ou copie a chave:</p>
             
-            <button onclick="window.open('https:mpago.la/141jBqp', '_blank')" style="background: #009ee3; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 8px; width: 100%;">
-                🔗 Abrir Link de Pagamento Direto
+            <!-- Botão para copiar a chave caso o usuário esteja no celular -->
+            <button onclick="copiarChavePixVIP()" style="background: #820ad1; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 8px; width: 100%;">
+                📋 Copiar Chave Pix
             </button>
+            <p id="pixCopyStatus" style="font-size: 11px; color: #34d399; margin-top: 6px; display: none;">Chave Pix copiada com sucesso!</p>
         </div>
 
-        <p style="font-size: 11px; color: #9ca3af; text-align: center;">Após o pagamento, envie o comprovante para liberação imediata do acesso.</p>
-
+        <p style="font-size: 11px; color: #9ca3af; text-align: center;">Após o pagamento, envie o comprovante para liberação imediata.</p>
 <!-- TELA 2: TABULEIRO / JOGO -->
 <div class="screen" id="gameScreen">
   <div class="app">
@@ -1173,6 +1174,14 @@ function openPremiumModal() {
 function closePremiumModal() {
     document.getElementById('premiumModal').style.display = 'none';
 }
+function copiarChavePixVIP() {
+        const chavePix = "9f52df51-12d8-44d4-99ed-60cbec9a5a4d";
+        navigator.clipboard.writeText(chavePix).then(() => {
+            const status = document.getElementById('pixCopyStatus');
+            status.style.display = 'block';
+            setTimeout(() => { status.style.display = 'none'; }, 3000);
+        });
+    }
 </script>
 <!-- BOTÃO FLUTUANTE DE APOIO -->
 <button id="pixBtn" onclick="openPixModal()" style="position: fixed; bottom: 20px; right: 20px; background-color: #32bcad; color: #fff; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; font-family: sans-serif;">
