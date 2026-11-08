@@ -340,6 +340,27 @@ header{
         </div>
 
         <p style="font-size: 11px; color: #9ca3af; text-align: center;">Após o pagamento, envie o comprovante para liberação imediata do seu acesso.</p>
+        <!-- CAIXA DE PAGAMENTO COM BOTÃO DE ATIVAÇÃO VIP -->
+        <div style="background: #111827; padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
+            <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
+            <span style="font-size: 24px; font-weight: bold; color: #34d399; display: block; margin-top: 5px;">R$ 19,90</span>
+            
+            <p style="font-size: 13px; color: #d1d5db; margin-top: 15px;">Copie a chave Pix abaixo e pague o valor exato de <b>R$ 19,90</b>:</p>
+            
+            <div style="background: #1f2937; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px dashed #4b5563; word-break: break-all;">
+                <span id="txtChavePix" style="font-size: 12px; color: #f3f4f6; font-family: monospace;">00020126580014BR.GOV.BCB.PIX0136271a3e62-b6a6-4eeb-87fa-9b0329747622520400005303986540519.905802BR5924Marcos Felipe Cavalcante6009SAO PAULO62140510PLtGryFLdV630450D3</span>
+            </div>
+            
+            <button onclick="copiarChavePixSimples()" style="background: #820ad1; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; margin-top: 8px; width: 100%;">
+                📋 Copiar Chave Pix
+            </button>
+            <p id="pixCopyStatus" style="font-size: 11px; color: #34d399; margin-top: 5px; display: none;">Chave Pix copiada com sucesso!</p>
+            
+            <!-- BOTÃO PARA ATIVAR O VIP NA CONTA LOGADA -->
+            <button onclick="ativarVipConta()" style="background: #eab308; color: #000; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; margin-top: 15px; width: 100%;">
+                ⭐ Já Fiz o Pagamento (Ativar VIP)
+            </button>
+        </div>
        <!-- TELA 2: TABULEIRO / JOGO -->
 <div class="screen" id="gameScreen">
   <div class="app">
@@ -1272,7 +1293,35 @@ function copiarChavePixSimples() {
     // Executa ao carregar a página para manter o utilizador logado
     window.onload = function() {
         atualizarInterfaceUtilizador();
-    };
+     };
+     function ativarVipConta() {
+        const logadoStr = localStorage.getItem('chess_logged_user');
+        if (!logadoStr) {
+            alert('Você precisa estar com uma conta Entrada (Logada) para ativar o VIP!');
+            fecharModalPix();
+            abrirModalAuth('login');
+            return;
+        }
+
+        let user = JSON.parse(logadoStr);
+        user.vip = true; // Torna o utilizador VIP
+
+        // Atualiza na sessão ativa
+        localStorage.setItem('chess_logged_user', JSON.stringify(user));
+        
+        // Atualiza também no registo geral salvo no navegador
+        let dadosGerais = localStorage.getItem('chess_user_' + user.email);
+        if (dadosGerais) {
+            let contaGeral = JSON.parse(dadosGerais);
+            contaGeral.vip = true;
+            localStorage.setItem('chess_user_' + user.email, JSON.stringify(contaGeral));
+        }
+
+        alert('Parabéns, ' + user.email + '! O seu acesso VIP foi ativado com sucesso!');
+        fecharModalPix();
+        atualizarInterfaceUtilizador();
+    }
+
 
 </script>
 <!-- BOTÃO FLUTUANTE DE APOIO -->
