@@ -296,23 +296,23 @@ header{
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício por Pix:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
         </div>
-        <!-- CAIXA DE PREÇO E QR CODE PIX NATIVO -->
+       <!-- CAIXA DE PREÇO E PIX COPIA E COLA COM VALOR FIXO -->
         <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
             
-            <!-- QR CODE GERADO COM A CHAVE PIX DIRETA -->
+            <!-- QR CODE GERADO PELO PAYLOAD DO PIX FIXO -->
             <div style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin-top: 15px;">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=9f52df51-12d8-44d4-99ed-60cbec9a5a4d" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://mpago.la/2oSpNFz" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
             </div>
             
-            <p style="font-size: 12px; color: #d1d5db; margin-top: 10px;">Escaneie o QR Code com o app do seu banco ou copie a chave:</p>
+            <p style="font-size: 12px; color: #d1d5db; margin-top: 10px;">Escaneie o QR Code ou copie o código Pix abaixo:</p>
             
-            <!-- Botão para copiar a chave caso o usuário esteja no celular -->
-            <button onclick="copiarChavePixVIP()" style="background: #820ad1; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 8px; width: 100%;">
-                📋 Copiar Chave Pix
+            <!-- Botão para copiar o Pix Copia e Cola exato -->
+            <button onclick="copiarPixFixo()" style="background: #820ad1; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 8px; width: 100%;">
+                📋 Copiar Código Pix (R$ 19,90)
             </button>
-            <p id="pixCopyStatus" style="font-size: 11px; color: #34d399; margin-top: 6px; display: none;">Chave Pix copiada com sucesso!</p>
+            <p id="pixCopyStatus" style="font-size: 11px; color: #34d399; margin-top: 6px; display: none;">Código Pix copiado! Cole no app do banco.</p>
         </div>
 
         <p style="font-size: 11px; color: #9ca3af; text-align: center;">Após o pagamento, envie o comprovante para liberação imediata.</p>
@@ -1174,9 +1174,9 @@ function openPremiumModal() {
 function closePremiumModal() {
     document.getElementById('premiumModal').style.display = 'none';
 }
-function copiarChavePixVIP() {
-        const chavePix = "9f52df51-12d8-44d4-99ed-60cbec9a5a4d";
-        navigator.clipboard.writeText(chavePix).then(() => {
+function copiarPixFixo() {
+        const pixPayload = "https://mpago.la/2oSpNFz"; // Cole o mesmo código longo aqui dentro
+        navigator.clipboard.writeText(pixPayload).then(() => {
             const status = document.getElementById('pixCopyStatus');
             status.style.display = 'block';
             setTimeout(() => { status.style.display = 'none'; }, 3000);
