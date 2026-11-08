@@ -296,19 +296,25 @@ header{
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício por Pix:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
         </div>
-
-        <!-- OPÇÕES DE PAGAMENTO PIX / QR CODE -->
-        <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #374151; text-align: center;">
-            <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício:</span>
+        <!-- CAIXA DE PREÇO E QR CODE DO MERCADO PAGO -->
+        <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
+            <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
+            
+            <!-- QR CODE GERADO DIRETAMENTE NO MODAL -->
+            <div style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin-top: 15px;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https:mpago.la/141jBqp" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
+            </div>
+            
+            <p style="font-size: 12px; color: #d1d5db; margin-top: 10px;">Escaneie o QR Code com o app do banco ou clique abaixo:</p>
+            
+            <button onclick="window.open('https:mpago.la/141jBqp', '_blank')" style="background: #009ee3; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 8px; width: 100%;">
+                🔗 Abrir Link de Pagamento Direto
+            </button>
         </div>
-<!-- BOTÃO DE PAGAMENTO MERCADO PAGO -->
-        <button onclick="window.open('https:mpago.la/141jBqp', '_blank')" style="background: #009ee3; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            💙 Pagar com Mercado Pago (R$ 19,90)
-        </button>
 
-        <p style="font-size: 11px; color: #9ca3af; margin-top: 15px; text-align: center;">Após o pagamento, envie o comprovante para liberação do acesso.</p>
-</div>
+        <p style="font-size: 11px; color: #9ca3af; text-align: center;">Após o pagamento, envie o comprovante para liberação imediata do acesso.</p>
+
 <!-- TELA 2: TABULEIRO / JOGO -->
 <div class="screen" id="gameScreen">
   <div class="app">
