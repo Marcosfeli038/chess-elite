@@ -296,26 +296,26 @@ header{
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício por Pix:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
         </div>
-        <!-- CAIXA DE PREÇO E PIX FIXO PICPAY -->
-        <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
+        <!-- CAIXA DE PAGAMENTO APENAS COM CHAVE PIX E VALOR -->
+        <div style="background: #111827; padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
-            <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
+            <span style="font-size: 24px; font-weight: bold; color: #34d399; display: block; margin-top: 5px;">R$ 19,90</span>
             
-            <!-- QR CODE GERADO PELO PAYLOAD DO PICPAY -->
-            <div style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin-top: 15px;">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=00020126360014br.gov.bcb.pix0114+5593991151900520400005303986540519.905802BR5924MARCOS FELIPECAVALCANTE6009SaoPaulo62290525-REC6AF06F3F9862957591931663045080" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
+            <p style="font-size: 13px; color: #d1d5db; margin-top: 15px;">Copie a chave Pix abaixo e pague o valor exato de <b>R$ 19,90</b> no seu banco:</p>
+            
+            <!-- Caixa exibindo a chave Pix -->
+            <div style="background: #1f2937; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px dashed #4b5563; word-break: break-all;">
+                <span id="txtChavePix" style="font-size: 12px; color: #f3f4f6; font-family: monospace;">271a3e62-b6a6-4eep-87fa-9b0329747622</span>
             </div>
             
-            <p style="font-size: 12px; color: #d1d5db; margin-top: 10px;">Escaneie o QR Code ou copie o código Pix abaixo:</p>
-            
-            <!-- Botão para copiar o Pix do PicPay -->
-            <button onclick="copiarPixFixo()" style="background: #11c76f; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 8px; width: 100%;">
-                🟢 Copiar Código Pix (PicPay)
+            <!-- Botão de Copiar Chave -->
+            <button onclick="copiarChavePixSimples()" style="background: #820ad1; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; margin-top: 8px; width: 100%;">
+                📋 Copiar Chave Pix
             </button>
-            <p id="pixCopyStatus" style="font-size: 11px; color: #34d399; margin-top: 6px; display: none;">Código Pix copiado! Cole no app do banco.</p>
+            <p id="pixCopyStatus" style="font-size: 11px; color: #34d399; margin-top: 8px; display: none;">Chave Pix copiada com sucesso!</p>
         </div>
 
-        <p style="font-size: 11px; color: #9ca3af; text-align: center;">Após o pagamento, envie o comprovante para liberação imediata.</p>
+        <p style="font-size: 11px; color: #9ca3af; text-align: center;">Após o pagamento, envie o comprovante para liberação imediata do seu acesso.</p>
        <!-- TELA 2: TABULEIRO / JOGO -->
 <div class="screen" id="gameScreen">
   <div class="app">
@@ -1174,9 +1174,9 @@ function openPremiumModal() {
 function closePremiumModal() {
     document.getElementById('premiumModal').style.display = 'none';
 }
-function copiarPixFixo() {
-        const pixPayload = "00020126360014br.gov.bcb.pix0114+5s593991151900520400005303986540519.905802BR5924MARCOS FELIPECAVALCANTE6009SaoPaulo62290525-REC6AF06F3F9862957591931663045080"; // Cole o mesmo código do PicPay aqui
-        navigator.clipboard.writeText(pixPayload).then(() => {
+function copiarChavePixSimples() {
+        const chavePix = "271a3e62-b6a6-4eep-87fa-9b0329747622";
+        navigator.clipboard.writeText(chavePix).then(() => {
             const status = document.getElementById('pixCopyStatus');
             status.style.display = 'block';
             setTimeout(() => { status.style.display = 'none'; }, 3000);
