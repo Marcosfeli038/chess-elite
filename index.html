@@ -296,21 +296,21 @@ header{
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso Vitalício por Pix:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
         </div>
-       <!-- CAIXA DE PREÇO E PIX COPIA E COLA COM VALOR FIXO -->
+       <!-- CAIXA DE PREÇO E PIX FIXO NUBANK -->
         <div style="background: #111827; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #374151; text-align: center;">
             <span style="font-size: 12px; color: #9ca3af; display: block;">Acesso VIP Vitalício:</span>
             <span style="font-size: 22px; font-weight: bold; color: #34d399;">R$ 19,90</span>
             
-            <!-- QR CODE GERADO PELO PAYLOAD DO PIX FIXO -->
+            <!-- QR CODE GERADO PELO PAYLOAD DO NUBANK -->
             <div style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin-top: 15px;">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://mpago.la/2oSpNFz" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=271a3e62-b6a6-4eeb- 87fa-960329747622" alt="QR Code Pix VIP" style="display: block; width: 140px; height: 140px;" />
             </div>
             
             <p style="font-size: 12px; color: #d1d5db; margin-top: 10px;">Escaneie o QR Code ou copie o código Pix abaixo:</p>
             
-            <!-- Botão para copiar o Pix Copia e Cola exato -->
+            <!-- Botão para copiar o Pix Copia e Cola do Nubank -->
             <button onclick="copiarPixFixo()" style="background: #820ad1; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 8px; width: 100%;">
-                📋 Copiar Código Pix (R$ 19,90)
+                💜 Copiar Código Pix (Nubank)
             </button>
             <p id="pixCopyStatus" style="font-size: 11px; color: #34d399; margin-top: 6px; display: none;">Código Pix copiado! Cole no app do banco.</p>
         </div>
@@ -1175,13 +1175,13 @@ function closePremiumModal() {
     document.getElementById('premiumModal').style.display = 'none';
 }
 function copiarPixFixo() {
-        const pixPayload = "https://mpago.la/2oSpNFz"; // Cole o mesmo código longo aqui dentro
-        navigator.clipboard.writeText(pixPayload).then(() => {
-            const status = document.getElementById('pixCopyStatus');
-            status.style.display = 'block';
-            setTimeout(() => { status.style.display = 'none'; }, 3000);
-        });
-    }
+    const pixPayload = "COLOQUE_SEU_PIX_COPIA_E_COLA_AQUI"; // Cole aqui o código do Nubank
+    navigator.clipboard.writeText(pixPayload).then(() => {
+        const status = document.getElementById('pixCopyStatus');
+        status.style.display = 'block';
+        setTimeout(() => { status.style.display = 'none'; }, 3000);
+    });
+}
 </script>
 <!-- BOTÃO FLUTUANTE DE APOIO -->
 <button id="pixBtn" onclick="openPixModal()" style="position: fixed; bottom: 20px; right: 20px; background-color: #32bcad; color: #fff; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; font-family: sans-serif;">
