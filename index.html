@@ -710,19 +710,19 @@ header{
       }
   };
 
-  // Matchmaking Online em Tempo Real no Firebase
+  // Matchmaking Online Otimizado para Testes Reais
   function procurarPartidaOnlineFirebase() {
       const matchQueueRef = db.ref('matchmaking');
-      let encontrou = false;
+      const meuIdSessao = 'player_' + Math.random().toString(36).substring(2, 9);
 
-      // Escuta a fila em tempo real para encontrar ou criar sala instantaneamente
       matchQueueRef.once('value', snapshot => {
           let salaEncontradaId = null;
           const val = snapshot.val();
           
           if (val) {
               for (let key in val) {
-                  if (val[key].status === 'aguardando') {
+                  // Procura uma sala criada por OUTRO jogador que esteja a aguardar
+                  if (val[key].status === 'aguardando' && val[key].criadorId !== meuIdSessao) {
                       salaEncontradaId = key;
                       break;
                   }
@@ -730,7 +730,7 @@ header{
           }
 
           if (salaEncontradaId) {
-              encontrou = true;
+              // Entra na sala existente como Pretas (b)
               activeRoomRef = db.ref('matchmaking/' + salaEncontradaId);
               onlineMyColor = 'b';
               config.playerColor = 'b';
@@ -743,6 +743,7 @@ header{
                   ouvirAtualizacoesFirebase();
               });
           } else {
+              // Cria uma nova sala e aguarda oponente como Brancas (w)
               const novaSalaRef = matchQueueRef.push();
               activeRoomRef = novaSalaRef;
               onlineMyColor = 'w';
@@ -750,12 +751,14 @@ header{
               
               novaSalaRef.set({
                   status: 'aguardando',
+                  criadorId: meuIdSessao,
                   criador: config.playerName,
                   fen: game.fen()
               });
 
               novaSalaRef.onDisconnect().remove();
 
+              // Fica a escutar até que alguém entre na sala
               novaSalaRef.on('value', snap => {
                   const dados = snap.val();
                   if (dados && dados.status === 'cheia' && document.getElementById('matchingModal').style.display === 'flex') {
