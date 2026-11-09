@@ -255,9 +255,11 @@ header{
 
         <div class="menu-group">
           <label for="menuMode">Modo de Jogo</label>
-          <select id="menuMode">
+          <select id="menuMode" onchange="verificarModoVIP(this.value)">
             <option value="ai">Contra o Computador</option>
             <option value="friend">2 Jogadores (Local)</option>
+            <option value="online">🌐 Jogar Online (Aleatório) ⭐ VIP</option>
+            <option value="private">👥 Jogar com um Amigo (Código) ⭐ VIP</option>
           </select>
         </div>
 
@@ -409,6 +411,18 @@ header{
               </div>
             </section>
 
+            <!-- CHAT AO VIVO EXCLUSIVO VIP -->
+            <section class="panel" id="chatPanel" style="display: none;">
+              <h3>💬 Chat ao Vivo (VIP)</h3>
+              <div id="chatMessages" style="height: 110px; overflow-y: auto; background: #090f0c; padding: 8px; border-radius: 6px; font-size: 11px; margin-bottom: 8px; border: 1px solid var(--border);">
+                <div style="color: var(--muted); text-align: center;">Canal seguro conectado.</div>
+              </div>
+              <div style="display: flex; gap: 4px;">
+                <input type="text" id="chatInput" placeholder="Mensagem..." style="flex: 1; background: #1b2a21; border: 1px solid var(--border); border-radius: 6px; padding: 6px; color: white; font-size: 11px;" />
+                <button onclick="enviarMensagemChat()" class="btn primary" style="padding: 6px 10px; font-size: 11px;">Enviar</button>
+              </div>
+            </section>
+
             <section class="panel">
               <h3>Estatísticas da Partida</h3>
               <div class="stats-grid">
@@ -520,6 +534,46 @@ header{
   let version = 0;
   let promotionPending = null;
 
+  // Validação e Segurança de Modos VIP
+  function verificarModoVIP(modo) {
+      if (modo === 'online' || modo === 'private') {
+          const logadoStr = localStorage.getItem('chess_logged_user');
+          const user = logadoStr ? JSON.parse(logadoStr) : null;
+
+          if (!user || !user.vip) {
+              alert('👑 Os modos Online e Privado por Código são exclusivos para membros VIP!');
+              document.getElementById('menuMode').value = 'ai';
+              openPremiumModal();
+              return;
+          }
+
+          if (modo === 'private') {
+              const codigo = 'ELITE-' + Math.floor(1000 + Math.random() * 9000);
+              prompt("Copie e envie este código de sala privada para o seu amigo:", codigo);
+          }
+      }
+  }
+
+  // Chat ao Vivo VIP
+  function enviarMensagemChat() {
+      const input = document.getElementById('chatInput');
+      const texto = input.value.trim();
+      if (!texto) return;
+
+      const logadoStr = localStorage.getItem('chess_logged_user');
+      const user = logadoStr ? JSON.parse(logadoStr) : { email: 'Jogador VIP' };
+      const nomeCurto = user.email.split('@')[0];
+
+      const chatBox = document.getElementById('chatMessages');
+      chatBox.innerHTML += `<div style="margin-bottom: 4px;"><strong style="color: #34d399;">${nomeCurto}:</strong> ${textSanitize(texto)}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      input.value = '';
+  }
+
+  function textSanitize(text) {
+      return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
   // Carregar Dados Salvos do Perfil
   function loadUserData() {
     const saved = localStorage.getItem("chessEliteProfile");
@@ -566,6 +620,7 @@ header{
 
   // Gerenciamento de Telas
   $("menuMode").onchange = e => {
+    verificarModoVIP(e.target.value);
     $("menuDifficultyGroup").style.display = e.target.value === "ai" ? "block" : "none";
     $("menuColorGroup").style.display = e.target.value === "ai" ? "block" : "none";
   };
@@ -578,6 +633,15 @@ header{
     config.timeControl = Number($("menuTime").value);
 
     flipped = config.playerColor === "b";
+
+    // Exibir ou ocultar chat dependendo se é modo VIP online/privado
+    const logadoStr = localStorage.getItem('chess_logged_user');
+    const user = logadoStr ? JSON.parse(logadoStr) : null;
+    if ((config.mode === 'online' || config.mode === 'private') && user && user.vip) {
+        $("chatPanel").style.display = "block";
+    } else {
+        $("chatPanel").style.display = "none";
+    }
 
     $("menuScreen").classList.remove("active");
     $("gameScreen").classList.add("active");
@@ -729,8 +793,8 @@ header{
     const topC = config.mode === "ai" ? aiColor() : "b";
     const bottomC = config.mode === "ai" ? config.playerColor : "w";
 
-    $("topName").textContent = config.mode === "ai" ? "Computador" : "Jogador 2";
-    $("bottomName").textContent = config.mode === "ai" ? config.playerName : "Jogador 1";
+    $("topName").textContent = config.mode === "ai" ? "Computador" : "Oponente";
+    $("bottomName").textContent = config.playerName;
 
     $("topAvatar").textContent = config.mode === "ai" ? "🤖" : "👤";
     $("bottomAvatar").textContent = "👤";
