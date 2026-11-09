@@ -258,9 +258,15 @@ header{
           <select id="menuMode" onchange="verificarModoVIP(this.value)">
             <option value="ai">Contra o Computador</option>
             <option value="friend">2 Jogadores (Local)</option>
-            <option value="online">🌐 Jogar Online (Aleatório) ⭐ VIP</option>
+            <option value="online">🌐 Jogar Online (Procurar Partida) ⭐ VIP</option>
             <option value="private">👥 Jogar com um Amigo (Código) ⭐ VIP</option>
           </select>
+        </div>
+
+        <!-- CAMPO EXCLUSIVO PARA INSERIR O CÓDIGO DA SALA DO AMIGO -->
+        <div class="menu-group" id="codigoSalaGroup" style="display: none;">
+          <label for="inputCodigoSala">Código da Sala Privada</label>
+          <input type="text" id="inputCodigoSala" placeholder="Ex: ELITE-4821" maxlength="10">
         </div>
 
         <div class="menu-group" id="menuDifficultyGroup">
@@ -534,12 +540,15 @@ header{
   let version = 0;
   let promotionPending = null;
 
-  // Validação e Segurança de Modos VIP
+  // Validação e exibição de campos VIP
   function verificarModoVIP(modo) {
-      if (modo === 'online' || modo === 'private') {
-          const logadoStr = localStorage.getItem('chess_logged_user');
-          const user = logadoStr ? JSON.parse(logadoStr) : null;
+      const logadoStr = localStorage.getItem('chess_logged_user');
+      const user = logadoStr ? JSON.parse(logadoStr) : null;
+      
+      const campoCodigo = document.getElementById('codigoSalaGroup');
+      campoCodigo.style.display = 'none';
 
+      if (modo === 'online' || modo === 'private') {
           if (!user || !user.vip) {
               alert('👑 Os modos Online e Privado por Código são exclusivos para membros VIP!');
               document.getElementById('menuMode').value = 'ai';
@@ -548,12 +557,18 @@ header{
           }
 
           if (modo === 'private') {
-              const codigo = 'ELITE-' + Math.floor(1000 + Math.random() * 9000);
-              prompt("Copie e envie este código de sala privada para o seu amigo:", codigo);
+              campoCodigo.style.display = 'block';
+              let acao = confirm("Deseja criar uma nova sala ou entrar com um código existente?\n\n[OK] = Criar nova sala\n[Cancelar] = Tenho um código para entrar");
+              if (acao) {
+                  const codigoGerado = 'ELITE-' + Math.floor(1000 + Math.random() * 9000);
+                  document.getElementById('inputCodigoSala').value = codigoGerado;
+                  alert('Sua sala foi criada com o código: ' + codigoGerado + '\nEnvie este código para o seu amigo!');
+              } else {
+                  alert('Por favor, digite o código fornecido pelo seu amigo no campo que apareceu.');
+              }
           }
       }
   }
-
   // Chat ao Vivo VIP
   function enviarMensagemChat() {
       const input = document.getElementById('chatInput');
@@ -626,27 +641,39 @@ header{
   };
 
   $("startBtn").onclick = () => {
-    config.playerName = $("playerNameInput").value.trim() || "Mestre";
-    config.mode = $("menuMode").value;
-    config.difficulty = Number($("menuDifficulty").value);
-    config.playerColor = $("menuColor").value;
-    config.timeControl = Number($("menuTime").value);
+      config.playerName = $("playerNameInput").value.trim() || "Mestre";
+      config.mode = $("menuMode").value;
+      config.difficulty = Number($("menuDifficulty").value);
+      config.playerColor = $("menuColor").value;
+      config.timeControl = Number($("menuTime").value);
 
-    flipped = config.playerColor === "b";
+      if (config.mode === 'private') {
+          const codigo = document.getElementById('inputCodigoSala').value.trim();
+          if (!codigo) {
+              alert('Por favor, insira ou crie um código de sala válido para jogar com um amigo.');
+              return;
+          }
+          notify('Conectando à sala privada: ' + codigo);
+      } else if (config.mode === 'online') {
+          notify('Procurando oponente online na rede...');
+          // Simulação de busca de oponente (poderá ser ligada ao Firebase futuramente)
+      }
 
-    // Exibir ou ocultar chat dependendo se é modo VIP online/privado
-    const logadoStr = localStorage.getItem('chess_logged_user');
-    const user = logadoStr ? JSON.parse(logadoStr) : null;
-    if ((config.mode === 'online' || config.mode === 'private') && user && user.vip) {
-        $("chatPanel").style.display = "block";
-    } else {
-        $("chatPanel").style.display = "none";
-    }
+      flipped = config.playerColor === 'b';
 
-    $("menuScreen").classList.remove("active");
-    $("gameScreen").classList.add("active");
+      // Gerenciar exibição do chat se for modo online/privado
+      const logadoStr = localStorage.getItem('chess_logged_user');
+      const user = logadoStr ? JSON.parse(logadoStr) : null;
+      if ((config.mode === 'online' || config.mode === 'private') && user && user.vip) {
+          $("chatPanel").style.display = "block";
+      } else {
+          $("chatPanel").style.display = "none";
+      }
 
-    restartGame();
+      $("menuScreen").classList.remove("active");
+      $("gameScreen").classList.add("active");
+
+      restartGame();
   };
 
   $("backToMenuBtn").onclick = () => {
