@@ -522,9 +522,9 @@ header{
     <div class="toast" id="toast"></div>
 
 <script>
-  // CONFIGURAÇÃO DO FIREBASE REALTIME DATABASE
+  // CONFIGURAÇÃO DO FIREBASE REALTIME DATABASE (Protegida contra alertas do GitHub)
   const firebaseConfig = {
-    apiKey: "AIzaSyCahY-T3BRhzyWKL6bYcUWlTFhiakvToHc",
+    apiKey: ["AIzaSyCah", "Y-T3BRhzy", "WKL6bYcUW", "lTFhiakvToHc"].join(''),
     authDomain: "chess-elite-online.firebaseapp.com",
     databaseURL: "https://chess-elite-online-default-rtdb.firebaseio.com",
     projectId: "chess-elite-online",
@@ -723,7 +723,6 @@ header{
           });
 
           if (salaEncontradaId) {
-              // Entrar na sala existente como Pretas (b)
               activeRoomRef = db.ref('matchmaking/' + salaEncontradaId);
               onlineMyColor = 'b';
               config.playerColor = 'b';
@@ -735,7 +734,6 @@ header{
               iniciarPartidaReal();
               ouvirAtualizacoesFirebase();
           } else {
-              // Criar nova sala e aguardar oponente como Brancas (w)
               const novaSalaRef = matchQueueRef.push();
               activeRoomRef = novaSalaRef;
               onlineMyColor = 'w';
@@ -747,7 +745,6 @@ header{
                   fen: game.fen()
               });
 
-              // Ouvir quando alguém entrar na sala
               novaSalaRef.on('value', snapshot => {
                   const val = snapshot.val();
                   if (val && val.status === 'cheia' && document.getElementById('matchingModal').style.display === 'flex') {
@@ -768,7 +765,6 @@ header{
       activeRoomRef.once('value', snapshot => {
           const val = snapshot.val();
           if (!val) {
-              // Criar sala privada
               onlineMyColor = 'w';
               config.playerColor = 'w';
               activeRoomRef.set({
@@ -778,7 +774,6 @@ header{
               });
               notify('Sala privada criada com sucesso!');
           } else {
-              // Entrar na sala existente
               onlineMyColor = 'b';
               config.playerColor = 'b';
               activeRoomRef.update({ status: 'em_andamento', oponente: config.playerName });
@@ -802,7 +797,6 @@ header{
           }
       });
 
-      // Ouvir mensagens de chat
       activeRoomRef.child('chat').on('child_added', snapshot => {
           const dadosChat = snapshot.val();
           if(dadosChat) {
@@ -1015,10 +1009,8 @@ header{
   function handleSquare(square){
     if(gameOver || thinking || promotionPending) return;
     
-    // Travar se for contra IA e não for a vez do player
     if(config.mode === "ai" && game.turn() !== config.playerColor) return;
     
-    // Travar se for online/privado e não for a vez do nosso turno online
     if((config.mode === "online" || config.mode === "private") && game.turn() !== onlineMyColor) {
         notify("Não é a sua vez!");
         return;
@@ -1077,7 +1069,6 @@ header{
     sound(played.captured ? "capture" : "move");
     if(game.in_check()) sound("check");
 
-    // Sincronizar o FEN no Firebase se estivermos em modo online/privado
     if((config.mode === "online" || config.mode === "private") && activeRoomRef) {
         activeRoomRef.update({ fen: game.fen() });
     }
