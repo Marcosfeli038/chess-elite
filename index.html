@@ -8,6 +8,11 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7338948340017475"
      crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+<!-- FIREBASE SDK (COMPAT) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <style>
 :root{
   --bg:#0b110e;
@@ -238,6 +243,16 @@ header{
             
             <button id="authActionBtn" onclick="executarAuth()" style="background: #10b981; color: #fff; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 10px;">Entrar</button>
             <button onclick="fecharModalAuth()" style="background: transparent; color: #9ca3af; border: none; cursor: pointer; font-size: 12px;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- TELA DE ESPERA / PROCURANDO OPONENTE ONLINE -->
+    <div id="matchingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,11,8,0.9); z-index: 4000; justify-content: center; align-items: center;">
+        <div style="background: var(--panel); border: 1px solid var(--border); padding: 30px; border-radius: 16px; text-align: center; max-width: 320px; width: 90%;">
+            <div style="font-size: 40px; margin-bottom: 15px; animation: pulse 1s infinite;">🌐</div>
+            <h3 style="margin-top: 0; color: var(--green);">Procurando Oponente...</h3>
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">À procura de um jogador online na rede Chess Elite.</p>
+            <button onclick="cancelarBuscaOnline()" class="btn danger" style="width: 100%;">Cancelar Busca</button>
         </div>
     </div>
 
@@ -507,6 +522,20 @@ header{
     <div class="toast" id="toast"></div>
 
 <script>
+  // CONFIGURAÇÃO DO FIREBASE REALTIME DATABASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyCahY-T3BRhzyWKL6bYcUWlTFhiakvToHc",
+    authDomain: "chess-elite-online.firebaseapp.com",
+    databaseURL: "https://chess-elite-online-default-rtdb.firebaseio.com",
+    projectId: "chess-elite-online",
+    storageBucket: "chess-elite-online.firebasestorage.app",
+    messagingSenderId: "897011232550",
+    appId: "1:897011232550:web:c2e7eaf2c1eadda5051be7",
+    measurementId: "G-CZ6Y1MVL76"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
   const game = new Chess();
   const $ = id => document.getElementById(id);
 
@@ -539,14 +568,18 @@ header{
   let aiTimer = null;
   let version = 0;
   let promotionPending = null;
+  
+  // Variáveis de Jogo Online / Firebase
+  let activeRoomRef = null;
+  let onlineMyColor = 'w';
 
-  // Validação e exibição de campos VIP
+  // Validação e exibição de campos VIP e Código de Sala
   function verificarModoVIP(modo) {
       const logadoStr = localStorage.getItem('chess_logged_user');
       const user = logadoStr ? JSON.parse(logadoStr) : null;
       
       const campoCodigo = document.getElementById('codigoSalaGroup');
-      campoCodigo.style.display = 'none';
+      if (campoCodigo) campoCodigo.style.display = 'none';
 
       if (modo === 'online' || modo === 'private') {
           if (!user || !user.vip) {
@@ -557,7 +590,7 @@ header{
           }
 
           if (modo === 'private') {
-              campoCodigo.style.display = 'block';
+              if (campoCodigo) campoCodigo.style.display = 'block';
               let acao = confirm("Deseja criar uma nova sala ou entrar com um código existente?\n\n[OK] = Criar nova sala\n[Cancelar] = Tenho um código para entrar");
               if (acao) {
                   const codigoGerado = 'ELITE-' + Math.floor(1000 + Math.random() * 9000);
@@ -569,19 +602,32 @@ header{
           }
       }
   }
-  // Chat ao Vivo VIP
+
+  // Cancelar a busca online
+  function cancelarBuscaOnline() {
+      if(activeRoomRef) {
+          activeRoomRef.remove();
+          activeRoomRef = null;
+      }
+      document.getElementById('matchingModal').style.display = 'none';
+      notify('Busca online cancelada.');
+  }
+
+  // Chat ao Vivo VIP via Firebase
   function enviarMensagemChat() {
       const input = document.getElementById('chatInput');
       const texto = input.value.trim();
-      if (!texto) return;
+      if (!texto || !activeRoomRef) return;
 
       const logadoStr = localStorage.getItem('chess_logged_user');
       const user = logadoStr ? JSON.parse(logadoStr) : { email: 'Jogador VIP' };
       const nomeCurto = user.email.split('@')[0];
 
-      const chatBox = document.getElementById('chatMessages');
-      chatBox.innerHTML += `<div style="margin-bottom: 4px;"><strong style="color: #34d399;">${nomeCurto}:</strong> ${textSanitize(texto)}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
+      activeRoomRef.child('chat').push({
+          sender: nomeCurto,
+          message: textSanitize(texto),
+          timestamp: Date.now()
+      });
       input.value = '';
   }
 
@@ -653,15 +699,125 @@ header{
               alert('Por favor, insira ou crie um código de sala válido para jogar com um amigo.');
               return;
           }
-          notify('Conectando à sala privada: ' + codigo);
+          document.getElementById('matchCode').textContent = "SALA: " + codigo;
+          conectarSalaFirebase(codigo, true);
       } else if (config.mode === 'online') {
-          notify('Procurando oponente online na rede...');
-          // Simulação de busca de oponente (poderá ser ligada ao Firebase futuramente)
+          document.getElementById('matchingModal').style.display = 'flex';
+          procurarPartidaOnlineFirebase();
+      } else {
+          document.getElementById('matchCode').textContent = "TREINO LOCAL";
+          iniciarPartidaReal();
       }
+  };
 
+  // Matchmaking Online no Firebase
+  function procurarPartidaOnlineFirebase() {
+      const matchQueueRef = db.ref('matchmaking');
+      matchQueueRef.once('value', snapshot => {
+          let salaEncontradaId = null;
+          snapshot.forEach(childSnap => {
+              const dadosSala = childSnap.val();
+              if (dadosSala.status === 'aguardando') {
+                  salaEncontradaId = childSnap.key;
+              }
+          });
+
+          if (salaEncontradaId) {
+              // Entrar na sala existente como Pretas (b)
+              activeRoomRef = db.ref('matchmaking/' + salaEncontradaId);
+              onlineMyColor = 'b';
+              config.playerColor = 'b';
+              activeRoomRef.update({ status: 'cheia', oponente: config.playerName });
+              
+              document.getElementById('matchingModal').style.display = 'none';
+              document.getElementById('matchCode').textContent = "ONLINE #VIP";
+              notify('Oponente encontrado! Partida iniciada.');
+              iniciarPartidaReal();
+              ouvirAtualizacoesFirebase();
+          } else {
+              // Criar nova sala e aguardar oponente como Brancas (w)
+              const novaSalaRef = matchQueueRef.push();
+              activeRoomRef = novaSalaRef;
+              onlineMyColor = 'w';
+              config.playerColor = 'w';
+              
+              novaSalaRef.set({
+                  status: 'aguardando',
+                  criador: config.playerName,
+                  fen: game.fen()
+              });
+
+              // Ouvir quando alguém entrar na sala
+              novaSalaRef.on('value', snapshot => {
+                  const val = snapshot.val();
+                  if (val && val.status === 'cheia' && document.getElementById('matchingModal').style.display === 'flex') {
+                      document.getElementById('matchingModal').style.display = 'none';
+                      document.getElementById('matchCode').textContent = "ONLINE #VIP";
+                      notify('Oponente conectado! Partida iniciada.');
+                      iniciarPartidaReal();
+                      ouvirAtualizacoesFirebase();
+                  }
+              });
+          }
+      });
+  }
+
+  // Conectar a Sala Privada por Código no Firebase
+  function conectarSalaFirebase(codigo, isPrivate) {
+      activeRoomRef = db.ref('salas_privadas/' + codigo);
+      activeRoomRef.once('value', snapshot => {
+          const val = snapshot.val();
+          if (!val) {
+              // Criar sala privada
+              onlineMyColor = 'w';
+              config.playerColor = 'w';
+              activeRoomRef.set({
+                  fen: game.fen(),
+                  status: 'criada',
+                  criador: config.playerName
+              });
+              notify('Sala privada criada com sucesso!');
+          } else {
+              // Entrar na sala existente
+              onlineMyColor = 'b';
+              config.playerColor = 'b';
+              activeRoomRef.update({ status: 'em_andamento', oponente: config.playerName });
+              notify('Conectado à sala do amigo!');
+          }
+          iniciarPartidaReal();
+          ouvirAtualizacoesFirebase();
+      });
+  }
+
+  // Sincronizar lances e chat do Firebase em tempo real
+  function ouvirAtualizacoesFirebase() {
+      if(!activeRoomRef) return;
+
+      activeRoomRef.child('fen').on('value', snapshot => {
+          const fenRemoto = snapshot.val();
+          if (fenRemoto && fenRemoto !== game.fen()) {
+              game.load(fenRemoto);
+              renderBoard();
+              checkEnd();
+          }
+      });
+
+      // Ouvir mensagens de chat
+      activeRoomRef.child('chat').on('child_added', snapshot => {
+          const dadosChat = snapshot.val();
+          if(dadosChat) {
+              const chatBox = document.getElementById('chatMessages');
+              if(chatBox) {
+                  chatBox.innerHTML += `<div style="margin-bottom: 4px;"><strong style="color: #34d399;">${dadosChat.sender}:</strong> ${dadosChat.message}</div>`;
+                  chatBox.scrollTop = chatBox.scrollHeight;
+              }
+          }
+      });
+  }
+
+  function iniciarPartidaReal() {
       flipped = config.playerColor === 'b';
 
-      // Gerenciar exibição do chat se for modo online/privado
       const logadoStr = localStorage.getItem('chess_logged_user');
       const user = logadoStr ? JSON.parse(logadoStr) : null;
       if ((config.mode === 'online' || config.mode === 'private') && user && user.vip) {
@@ -673,12 +829,16 @@ header{
       $("menuScreen").classList.remove("active");
       $("gameScreen").classList.add("active");
 
-      restartGame();
-  };
+      restartGame(true);
+  }
 
   $("backToMenuBtn").onclick = () => {
     stopClock();
     clearTimeout(aiTimer);
+    if(activeRoomRef && config.mode === 'online') {
+        activeRoomRef.remove();
+    }
+    activeRoomRef = null;
     $("gameScreen").classList.remove("active");
     $("menuScreen").classList.add("active");
   };
@@ -820,7 +980,7 @@ header{
     const topC = config.mode === "ai" ? aiColor() : "b";
     const bottomC = config.mode === "ai" ? config.playerColor : "w";
 
-    $("topName").textContent = config.mode === "ai" ? "Computador" : "Oponente";
+    $("topName").textContent = config.mode === "ai" ? "Computador" : "Oponente Online";
     $("bottomName").textContent = config.playerName;
 
     $("topAvatar").textContent = config.mode === "ai" ? "🤖" : "👤";
@@ -846,6 +1006,7 @@ header{
     else if(thinking) message = "Computador pensando...";
     else if(game.in_check()) message = (turn === "w" ? "Brancas" : "Pretas") + " em xeque!";
     else if(config.mode === "ai") message = turn === config.playerColor ? "Sua vez de jogar" : "Vez do computador";
+    else if(config.mode === "online" || config.mode === "private") message = turn === onlineMyColor ? "Sua vez de jogar" : "Vez do oponente";
     else message = turn === "w" ? "Vez das brancas" : "Vez das pretas";
 
     $("status").textContent = message;
@@ -853,7 +1014,15 @@ header{
 
   function handleSquare(square){
     if(gameOver || thinking || promotionPending) return;
+    
+    // Travar se for contra IA e não for a vez do player
     if(config.mode === "ai" && game.turn() !== config.playerColor) return;
+    
+    // Travar se for online/privado e não for a vez do nosso turno online
+    if((config.mode === "online" || config.mode === "private") && game.turn() !== onlineMyColor) {
+        notify("Não é a sua vez!");
+        return;
+    }
 
     const piece = game.get(square);
 
@@ -907,6 +1076,11 @@ header{
 
     sound(played.captured ? "capture" : "move");
     if(game.in_check()) sound("check");
+
+    // Sincronizar o FEN no Firebase se estivermos em modo online/privado
+    if((config.mode === "online" || config.mode === "private") && activeRoomRef) {
+        activeRoomRef.update({ fen: game.fen() });
+    }
 
     renderBoard();
     if(!checkEnd() && config.mode === "ai" && game.turn() === aiColor()){
@@ -1089,10 +1263,15 @@ header{
   }
 
   // Controles do Jogo
-  function restartGame(){
+  function restartGame(isOnlineReload = false){
     version++;
     clearTimeout(aiTimer);
-    game.reset();
+    if(!isOnlineReload) {
+        game.reset();
+        if(activeRoomRef && (config.mode === "online" || config.mode === "private")) {
+            activeRoomRef.update({ fen: game.fen() });
+        }
+    }
     selected = null;
     targets = [];
     lastMove = null;
@@ -1109,10 +1288,12 @@ header{
     if(config.mode === "ai" && config.playerColor === "b"){
       scheduleAI();
     }
-    notify("Nova partida iniciada.");
+    if(!isOnlineReload) notify("Nova partida iniciada.");
   }
 
-  $("restart").onclick = restartGame;
+  $("restart").onclick = () => {
+      if(config.mode === "ai" || config.mode === "friend") restartGame();
+  };
 
   $("undo").onclick = () => {
     if(thinking || gameOver || !game.history().length) return;
@@ -1126,6 +1307,9 @@ header{
     if(history.length){
       const m = history[history.length - 1];
       lastMove = {from: m.from, to: m.to};
+    }
+    if((config.mode === "online" || config.mode === "private") && activeRoomRef) {
+        activeRoomRef.update({ fen: game.fen() });
     }
     resetClock();
     renderBoard();
@@ -1200,7 +1384,7 @@ header{
   };
 
   $("closeResult").onclick = () => $("resultModal").classList.remove("show");
-  $("newFromResult").onclick = restartGame;
+  $("newFromResult").onclick = () => restartGame();
 
   $("saveGame").onclick = () => {
     const data = { pgn: game.pgn(), config, clocks };
