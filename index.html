@@ -710,29 +710,38 @@ header{
       }
   };
 
-  // Matchmaking Online no Firebase
+  // Matchmaking Online em Tempo Real no Firebase
   function procurarPartidaOnlineFirebase() {
       const matchQueueRef = db.ref('matchmaking');
+      let encontrou = false;
+
+      // Escuta a fila em tempo real para encontrar ou criar sala instantaneamente
       matchQueueRef.once('value', snapshot => {
           let salaEncontradaId = null;
-          snapshot.forEach(childSnap => {
-              const dadosSala = childSnap.val();
-              if (dadosSala.status === 'aguardando') {
-                  salaEncontradaId = childSnap.key;
+          const val = snapshot.val();
+          
+          if (val) {
+              for (let key in val) {
+                  if (val[key].status === 'aguardando') {
+                      salaEncontradaId = key;
+                      break;
+                  }
               }
-          });
+          }
 
           if (salaEncontradaId) {
+              encontrou = true;
               activeRoomRef = db.ref('matchmaking/' + salaEncontradaId);
               onlineMyColor = 'b';
               config.playerColor = 'b';
-              activeRoomRef.update({ status: 'cheia', oponente: config.playerName });
               
-              document.getElementById('matchingModal').style.display = 'none';
-              document.getElementById('matchCode').textContent = "ONLINE #VIP";
-              notify('Oponente encontrado! Partida iniciada.');
-              iniciarPartidaReal();
-              ouvirAtualizacoesFirebase();
+              activeRoomRef.update({ status: 'cheia', oponente: config.playerName }).then(() => {
+                  document.getElementById('matchingModal').style.display = 'none';
+                  document.getElementById('matchCode').textContent = "ONLINE #VIP";
+                  notify('Oponente encontrado! Partida iniciada.');
+                  iniciarPartidaReal();
+                  ouvirAtualizacoesFirebase();
+              });
           } else {
               const novaSalaRef = matchQueueRef.push();
               activeRoomRef = novaSalaRef;
@@ -745,9 +754,11 @@ header{
                   fen: game.fen()
               });
 
-              novaSalaRef.on('value', snapshot => {
-                  const val = snapshot.val();
-                  if (val && val.status === 'cheia' && document.getElementById('matchingModal').style.display === 'flex') {
+              novaSalaRef.onDisconnect().remove();
+
+              novaSalaRef.on('value', snap => {
+                  const dados = snap.val();
+                  if (dados && dados.status === 'cheia' && document.getElementById('matchingModal').style.display === 'flex') {
                       document.getElementById('matchingModal').style.display = 'none';
                       document.getElementById('matchCode').textContent = "ONLINE #VIP";
                       notify('Oponente conectado! Partida iniciada.');
